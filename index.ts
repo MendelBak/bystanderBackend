@@ -2,7 +2,7 @@ import express from 'express';
 import mongoose from 'mongoose';
 
 // Internal
-import { uri } from '../backend/config/dbConsts';
+import { uri } from './config/dbConsts';
 import cookieSession from 'cookie-session';
 // require('./authentication/passport');
 import cors from 'cors';
@@ -34,7 +34,7 @@ app.use(
     // milliseconds of a day
     maxAge: 30 * 24 * 60 * 60 * 1000,
     keys: [keys.session.cookieKey],
-  })
+  }),
 );
 
 app.use(passport.initialize());

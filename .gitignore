@@ -6,3 +6,4 @@ backend/config/keys.ts
 SendForHelp/awsKeyPair.pem
 githubToken.*
 keys.ts
+mapboxKey.ts

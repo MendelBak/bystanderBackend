@@ -2,6 +2,7 @@ var admin = require('firebase-admin');
 var serviceAccount = require('../config/firebaseAdmin.json');
 import { IEmergencyLocation } from '../interfaces/IEmergencyLocation';
 import axios from 'axios';
+import { mapboxKey } from '../config/mapboxKey';
 
 // This file connects to the FCM - FIrebase Cloud messaging API using firebase-admin NPM package.
 
@@ -10,33 +11,31 @@ admin.initializeApp({
   // databaseURL: 'https://my-project.firebaseio.com'
 });
 
-async function getNearestIntersection(emergencyLocation: IEmergencyLocation) {
-  const test = await axios
-    .get(
-      `http://api.geonames.org/findNearestIntersectionOSMJSON?lat=${emergencyLocation?.latitude}&lng=${emergencyLocation?.longitude}&username=bystanderAccount`,
-    )
-    .then((response) => {
-      if (response) {
-        return `${response?.data?.intersection?.street1} & ${response?.data?.intersection?.street2}`;
-      } else {
-        return 'Emergency In Your Area!';
-      }
-    })
-    .catch((error) => {
-      console.error(
-        'There was an error finding the emergency intersection',
-        error,
-      );
-    });
+async function getStreetAddress(emergencyLocation: IEmergencyLocation) {
+  try {
+    const response = await axios.get(
+      `https://api.mapbox.com/geocoding/v5/mapbox.places/${emergencyLocation?.longitude},${emergencyLocation?.latitude}.json?types=address&access_token=${mapboxKey}`,
+    );
 
-  return test;
+    if (
+      response?.data?.['features']?.[0]?.['address'] &&
+      response?.data?.['features']?.[0]?.['text']
+    ) {
+      return `${response?.data?.['features']?.[0]?.['address']} ${response?.data?.['features']?.[0]?.['text']}`;
+    } else {
+      return 'Emergency In Your Area!';
+    }
+  } catch (error) {
+    console.error('There was an error finding the emergency address. ', error);
+    return 'Emergency In Your Area!';
+  }
 }
 
 export default module.exports = {
   sendEmergencyTopicPushNotification: async (
     emergencyLocation: IEmergencyLocation,
   ) => {
-    const nearestIntersection = await getNearestIntersection(emergencyLocation);
+    const nearestIntersection = await getStreetAddress(emergencyLocation);
 
     var message = {
       notification: {
