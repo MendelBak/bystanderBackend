@@ -52,7 +52,7 @@ app.listen(PORT, () => {
   try {
     console.log(`⚡️[server]: Server is running at https://localhost:${PORT}`);
 
-    mongoose.connect(uri, { useNewUrlParser: true, useUnifiedTopology: true });
+    mongoose.connect(uri);
     var db = mongoose.connection;
     db.on('error', console.error.bind(console, 'MongoDB connection error:'));
   } catch (err) {
